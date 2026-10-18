@@ -1,0 +1,20 @@
+{
+  "name": "beauty-shop",
+  "version": "1.0.0",
+  "description": "Skin & hair care shop",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^13.0.3",
+    "ejs": "^7.0.2",
+    "express": "^5.3.0",
+    "express-session": "^1.19.0",
+    "multer": "^2.4.0"
+  }
+}

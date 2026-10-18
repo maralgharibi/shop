@@ -1,0 +1,109 @@
+<%- include('_layout-top') %>
+<div class="admin-top"><h1>بخش‌ها و دسته‌بندی‌ها</h1></div>
+<p class="muted" style="margin-top:-10px">
+  <b>بخش</b> گروه اصلی است (مثل «آرایشی» یا «عطر و ادکلن») و در منوی بالای سایت دیده می‌شود.
+  <b>دسته‌بندی</b> زیرمجموعه هر بخش است (مثل «رژ لب» یا «عطر زنانه») و محصولات به آن اختصاص داده می‌شوند.
+</p>
+
+<!-- ================= SECTIONS ================= -->
+<div class="panel">
+  <h2>بخش‌های اصلی</h2>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>آیکون</th><th>نام بخش</th><th class="hide-sm">توضیح کوتاه</th><th>ترتیب</th><th></th><th>دسته‌ها</th><th></th></tr></thead>
+      <tbody>
+      <% sections.forEach(s => { %>
+        <tr>
+          <td colspan="5">
+            <form action="/admin/sections/<%= s.id %>" method="post" class="inline-row">
+              <input type="hidden" name="_csrf" value="<%= csrf %>">
+              <input class="input" name="emoji" value="<%= s.emoji || '' %>" style="width:56px;text-align:center" title="ایموجی یا علامت">
+              <input class="input" name="name" value="<%= s.name %>" required style="flex:1.2;min-width:130px">
+              <input class="input" name="description" value="<%= s.description || '' %>" style="flex:2;min-width:160px" placeholder="توضیح کوتاه (در صفحه اصلی)">
+              <input class="input" name="sort_order" type="number" value="<%= s.sort_order %>" style="width:70px" dir="ltr">
+              <button class="btn btn-ghost btn-sm">ذخیره</button>
+            </form>
+          </td>
+          <td><%= faNum(s.count) %></td>
+          <td>
+            <form action="/admin/sections/<%= s.id %>/delete" method="post" onsubmit="return confirm('بخش «<%= s.name %>» حذف شود؟')">
+              <input type="hidden" name="_csrf" value="<%= csrf %>">
+              <button class="btn btn-ghost btn-sm" style="color:var(--danger)" <%= s.count ? 'disabled title="اول دسته‌های این بخش را حذف یا منتقل کنید"' : '' %>>حذف</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="font-size:14px;margin:20px 0 10px">+ افزودن بخش جدید</h3>
+  <form action="/admin/sections" method="post" class="inline-row" style="align-items:flex-end">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <label class="field" style="width:70px;margin:0"><span>آیکون</span><input class="input" name="emoji" placeholder="✨" style="text-align:center"></label>
+    <label class="field" style="flex:1.2;min-width:150px;margin:0"><span>نام بخش</span><input class="input" name="name" required placeholder="مثلاً: مادر و کودک"></label>
+    <label class="field" style="flex:2;min-width:180px;margin:0"><span>توضیح کوتاه</span><input class="input" name="description" placeholder="مثلاً: شامپو بچه، کرم سوختگی"></label>
+    <label class="field" style="width:80px;margin:0"><span>ترتیب</span><input class="input" name="sort_order" type="number" value="<%= sections.length + 1 %>" dir="ltr"></label>
+    <button class="btn">افزودن بخش</button>
+  </form>
+</div>
+
+<!-- ================= CATEGORIES ================= -->
+<div class="panel">
+  <h2>+ افزودن دسته‌بندی</h2>
+  <% if (!sections.length) { %>
+    <p class="muted">اول یک بخش بسازید.</p>
+  <% } else { %>
+  <form action="/admin/categories" method="post" class="inline-row" style="align-items:flex-end">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <label class="field" style="flex:2;min-width:180px;margin:0"><span>نام دسته‌بندی</span><input class="input" name="name" required placeholder="مثلاً: تونر، پالت سایه، عطر جیبی"></label>
+    <label class="field" style="flex:1;min-width:150px;margin:0"><span>در کدام بخش؟</span>
+      <select class="input" name="section"><% sections.forEach(s => { %><option value="<%= s.slug %>"><%= s.emoji || '' %> <%= s.name %></option><% }) %></select>
+    </label>
+    <label class="field" style="width:80px;margin:0"><span>ترتیب</span><input class="input" name="sort_order" type="number" value="0" dir="ltr"></label>
+    <button class="btn">افزودن</button>
+  </form>
+  <% } %>
+</div>
+
+<% sections.concat([{ slug: null, name: 'بدون بخش', emoji: '❔' }]).forEach(sec => {
+     const list = cats.filter(c => sec.slug ? c.section === sec.slug : !sections.some(s => s.slug === c.section));
+     if (!list.length && !sec.slug) return; %>
+<div class="panel">
+  <h2><%= sec.emoji || '' %> <%= sec.name %> <span class="muted" style="font-weight:400;font-size:13px">(<%= faNum(list.length) %> دسته)</span></h2>
+  <% if (!list.length) { %>
+    <p class="muted" style="margin:0">هنوز دسته‌بندی ندارد — از فرم بالا اضافه کنید.</p>
+  <% } else { %>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>نام / بخش / ترتیب</th><th>محصولات</th><th></th></tr></thead>
+      <tbody>
+      <% list.forEach(c => { %>
+        <tr>
+          <td>
+            <form action="/admin/categories/<%= c.id %>" method="post" class="inline-row">
+              <input type="hidden" name="_csrf" value="<%= csrf %>">
+              <input class="input" name="name" value="<%= c.name %>" style="flex:2;min-width:150px">
+              <select class="input" name="section" style="flex:1;min-width:120px" title="انتقال به بخش دیگر">
+                <% sections.forEach(s => { %><option value="<%= s.slug %>" <%= c.section === s.slug ? 'selected' : '' %>><%= s.name %></option><% }) %>
+              </select>
+              <input class="input" name="sort_order" type="number" value="<%= c.sort_order %>" style="width:70px" dir="ltr">
+              <button class="btn btn-ghost btn-sm">ذخیره</button>
+            </form>
+          </td>
+          <td><a href="/admin?cat=<%= c.id %>" class="muted"><%= faNum(c.count) %></a></td>
+          <td>
+            <form action="/admin/categories/<%= c.id %>/delete" method="post" onsubmit="return confirm('دسته «<%= c.name %>» حذف شود؟ محصولاتش بدون دسته می‌شوند.')">
+              <input type="hidden" name="_csrf" value="<%= csrf %>">
+              <button class="btn btn-ghost btn-sm" style="color:var(--danger)">حذف</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</div>
+<% }) %>
+<%- include('_layout-bottom') %>

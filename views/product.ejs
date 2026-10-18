@@ -1,0 +1,77 @@
+<%- include('partials/header') %>
+<% const off = discountPct(p); const feats = (p.features || '').split('\n').map(s => s.trim()).filter(Boolean); %>
+<div class="breadcrumb">
+  <a href="/">خانه</a> / <a href="/shop">فروشگاه</a>
+  <% if (p.section_slug) { %> / <a href="/shop?section=<%= encodeURIComponent(p.section_slug) %>"><%= p.section_name %></a><% } %>
+  <% if (p.category_slug) { %> / <a href="/shop?cat=<%= encodeURIComponent(p.category_slug) %>"><%= p.category_name %></a><% } %>
+  / <span><%= p.name %></span>
+</div>
+
+<div class="product-main">
+  <div>
+    <div class="gallery-main" id="gallery-main">
+      <% if (images.length) { %><img src="/uploads/<%= images[0].filename %>" alt="<%= p.name %>"><% } else { %><span class="placeholder" style="font-size:96px">🧴</span><% } %>
+    </div>
+    <% if (images.length > 1) { %>
+      <div class="thumbs">
+        <% images.forEach((img, i) => { %>
+          <button type="button" class="<%= i === 0 ? 'active' : '' %>" data-src="/uploads/<%= img.filename %>"><img src="/uploads/<%= img.filename %>" alt=""></button>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+  <div>
+    <% if (p.brand) { %><a class="p-brand" href="/shop?brand=<%= encodeURIComponent(p.brand) %>"><%= p.brand %></a><% } %>
+    <h1 class="p-title"><%= p.name %></h1>
+    <% if (p.short_desc) { %><p class="p-short"><%= p.short_desc %></p><% } %>
+
+    <div class="p-meta">
+      <% if (p.stock > 0) { %><span class="tag green">موجود در انبار</span><% } else { %><span class="tag red">ناموجود</span><% } %>
+      <% if (p.category_name) { %><span class="tag"><%= p.category_name %></span><% } %>
+      <% if (p.suitable_for) { %><span class="tag">مناسب: <%= p.suitable_for %></span><% } %>
+      <% if (p.volume) { %><span class="tag"><%= p.volume %></span><% } %>
+    </div>
+
+    <div class="p-price-box">
+      <div class="row">
+        <span class="muted">قیمت</span>
+        <% if (off) { %><span><span class="price-old"><%= money(p.price) %></span> <span class="off">٪<%= faNum(off) %></span></span><% } %>
+      </div>
+      <div class="row" style="justify-content:flex-end"><span class="price"><%= money(off ? p.sale_price : p.price) %></span></div>
+    </div>
+
+    <% if (feats.length) { %>
+      <h3 style="font-size:15px;margin:0 0 10px">ویژگی‌های کلیدی</h3>
+      <ul class="features"><% feats.forEach(f => { %><li><%= f %></li><% }) %></ul>
+    <% } %>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab-btns" role="tablist">
+    <% let first = true; %>
+    <% if (p.description) { %><button class="active" data-tab="desc">توضیحات</button><% first = false } %>
+    <button class="<%= first ? 'active' : '' %>" data-tab="specs">مشخصات</button>
+    <% if (p.how_to_use) { %><button data-tab="usage">روش مصرف</button><% } %>
+    <% if (p.ingredients) { %><button data-tab="ingr"><%= p.section_slug === 'perfume' ? 'نُت‌های رایحه' : 'ترکیبات' %></button><% } %>
+  </div>
+  <% if (p.description) { %><div class="tab-panel" data-panel="desc"><%= p.description %></div><% } %>
+  <div class="tab-panel <%= p.description ? 'hidden' : '' %>" data-panel="specs">
+    <table class="spec-table">
+      <% if (p.brand) { %><tr><th>برند</th><td><%= p.brand %></td></tr><% } %>
+      <% if (p.category_name) { %><tr><th>دسته‌بندی</th><td><%= p.category_name %></td></tr><% } %>
+      <% if (p.suitable_for) { %><tr><th>مناسب برای</th><td><%= p.suitable_for %></td></tr><% } %>
+      <% if (p.volume) { %><tr><th>حجم / مشخصه</th><td><%= p.volume %></td></tr><% } %>
+      <% feats.forEach(f => { %><tr><th>ویژگی</th><td><%= f %></td></tr><% }) %>
+    </table>
+  </div>
+  <% if (p.how_to_use) { %><div class="tab-panel hidden" data-panel="usage"><%= p.how_to_use %></div><% } %>
+  <% if (p.ingredients) { %><div class="tab-panel hidden" data-panel="ingr"><%= p.ingredients %></div><% } %>
+</div>
+
+<% if (related.length) { %>
+  <div class="section-head"><h2>محصولات مشابه</h2></div>
+  <div class="grid"><% related.forEach(r => { %><%- include('partials/card', { p: r }) %><% }) %></div>
+<% } %>
+<%- include('partials/footer') %>

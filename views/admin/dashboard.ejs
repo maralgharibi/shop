@@ -1,0 +1,59 @@
+<%- include('_layout-top') %>
+<div class="admin-top">
+  <h1>محصولات</h1>
+  <a class="btn" href="/admin/products/new">+ افزودن محصول</a>
+</div>
+
+<div class="stats">
+  <div class="stat"><b><%= faNum(stats.products) %></b><span>کل محصولات</span></div>
+  <div class="stat"><b><%= faNum(stats.active) %></b><span>نمایش در سایت</span></div>
+  <div class="stat"><b><%= faNum(stats.outOfStock) %></b><span>ناموجود</span></div>
+  <div class="stat"><b><%= faNum(stats.categories) %></b><span>دسته‌بندی</span></div>
+</div>
+
+<div class="panel">
+  <form method="get" action="/admin" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+    <input class="input" style="flex:1;min-width:180px" name="q" placeholder="جستجو در نام یا برند…" value="<%= q %>">
+    <select class="input" style="width:auto" name="cat" onchange="this.form.submit()">
+      <option value="">همه دسته‌ها</option>
+      <% allCategories.forEach(c => { %><option value="<%= c.id %>" <%= cat === c.id ? 'selected' : '' %>><%= c.name %></option><% }) %>
+    </select>
+    <button class="btn btn-ghost">جستجو</button>
+  </form>
+
+  <% if (!products.length) { %>
+    <div class="empty"><div class="emoji">📦</div><p>محصولی پیدا نشد.</p><a class="btn" href="/admin/products/new">افزودن اولین محصول</a></div>
+  <% } else { %>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th></th><th>نام محصول</th><th class="hide-sm">دسته</th><th>قیمت</th><th class="hide-sm">موجودی</th><th>وضعیت</th><th></th></tr></thead>
+      <tbody>
+      <% products.forEach(p => { %>
+        <tr>
+          <td><% if (p.image) { %><img class="thumb" src="/uploads/<%= p.image %>" alt=""><% } else { %><div class="thumb">🧴</div><% } %></td>
+          <td><b><%= p.name %></b><div class="muted" style="font-size:12px"><%= p.brand || '' %><%= p.is_featured ? ' · ⭐ ویژه' : '' %></div></td>
+          <td class="hide-sm"><%= p.category_name || '—' %></td>
+          <td style="white-space:nowrap">
+            <% if (p.sale_price) { %><div class="price-old"><%= faNum(p.price) %></div><%= faNum(p.sale_price) %><% } else { %><%= faNum(p.price) %><% } %>
+          </td>
+          <td class="hide-sm"><%= p.stock > 0 ? faNum(p.stock) : 'ناموجود' %></td>
+          <td>
+            <form action="/admin/products/<%= p.id %>/toggle" method="post">
+              <input type="hidden" name="_csrf" value="<%= csrf %>">
+              <button class="status <%= p.is_active ? 'on' : 'off' %>" title="تغییر وضعیت"><%= p.is_active ? 'فعال' : 'مخفی' %></button>
+            </form>
+          </td>
+          <td>
+            <div class="actions">
+              <a class="btn btn-ghost btn-sm" href="/admin/products/<%= p.id %>/edit">ویرایش</a>
+              <a class="btn btn-ghost btn-sm" href="/product/<%= p.id %>" target="_blank">مشاهده</a>
+            </div>
+          </td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+  </div>
+  <% } %>
+</div>
+<%- include('_layout-bottom') %>

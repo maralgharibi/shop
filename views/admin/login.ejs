@@ -1,0 +1,16 @@
+<%- include('../partials/head') %>
+<body>
+<div class="login-wrap">
+  <form class="login-card" action="/admin/login" method="post">
+    <a href="/" class="logo"><%= siteName %><span>.</span></a>
+    <h1>ورود به پنل مدیریت</h1>
+    <% if (error) { %><div class="flash error"><%= error %></div><% } %>
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <input type="hidden" name="next" value="<%= next %>">
+    <label class="field"><span>نام کاربری</span><input class="input" name="username" required autofocus autocomplete="username" dir="ltr"></label>
+    <label class="field"><span>رمز عبور</span><input class="input" type="password" name="password" required autocomplete="current-password" dir="ltr"></label>
+    <button class="btn btn-block">ورود</button>
+  </form>
+</div>
+</body>
+</html>

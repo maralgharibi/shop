@@ -1,0 +1,26 @@
+<%- include('../partials/head') %>
+<body class="admin-body">
+<div class="admin-mobile-bar">
+  <a href="/admin" class="logo" style="font-size:20px"><%= siteName %><span>.</span></a>
+  <button class="btn btn-ghost btn-sm" id="admin-menu">☰ منو</button>
+</div>
+<div class="admin-shell">
+  <aside class="admin-side" id="admin-side">
+    <a href="/admin" class="logo"><%= siteName %><span>.</span></a>
+    <nav>
+      <a href="/admin" class="<%= currentPath === '/admin' ? 'active' : '' %>">📦 محصولات</a>
+      <a href="/admin/products/new" class="<%= currentPath === '/admin/products/new' ? 'active' : '' %>">➕ افزودن محصول</a>
+      <a href="/admin/categories" class="<%= currentPath === '/admin/categories' ? 'active' : '' %>">🗂️ بخش‌ها و دسته‌بندی‌ها</a>
+      <a href="/admin/password" class="<%= currentPath === '/admin/password' ? 'active' : '' %>">🔑 تغییر رمز</a>
+      <a href="/" target="_blank">🌐 مشاهده سایت</a>
+    </nav>
+    <div class="bottom">
+      <div style="margin-bottom:8px">کاربر: <b><%= adminName %></b></div>
+      <form action="/admin/logout" method="post">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <button class="btn btn-ghost btn-sm btn-block">خروج</button>
+      </form>
+    </div>
+  </aside>
+  <main class="admin-main">
+    <% if (flash) { %><div class="flash <%= flash.type %>"><%= flash.text %></div><% } %>

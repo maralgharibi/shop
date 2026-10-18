@@ -1,0 +1,15 @@
+<% const off = discountPct(p); const out = p.stock <= 0; %>
+<a class="card <%= out ? 'is-out' : '' %>" href="/product/<%= p.id %>">
+  <% if (out) { %><span class="badge out">ناموجود</span><% } else if (off) { %><span class="badge">٪<%= faNum(off) %></span><% } %>
+  <div class="card-img">
+    <% if (p.image) { %><img src="/uploads/<%= p.image %>" alt="<%= p.name %>" loading="lazy"><% } else { %><span class="placeholder">🧴</span><% } %>
+  </div>
+  <div class="card-body">
+    <% if (p.brand) { %><span class="card-brand"><%= p.brand %></span><% } %>
+    <h3 class="card-title"><%= p.name %></h3>
+    <div class="card-price">
+      <% if (off) { %><span class="price-old"><%= faNum(p.price) %></span><span class="price"><%= money(p.sale_price) %></span>
+      <% } else { %><span class="price"><%= money(p.price) %></span><% } %>
+    </div>
+  </div>
+</a>

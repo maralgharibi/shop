@@ -1,0 +1,33 @@
+<%- include('partials/header') %>
+<section class="hero">
+  <div>
+    <h1>زیبایی طبیعی،<br>با مراقبت درست</h1>
+    <p>محصولات اصل مراقبت پوست و مو، آرایشی، عطر و بهداشتی؛ با توضیحات کامل تا راحت‌تر انتخاب کنی.</p>
+    <div class="hero-actions">
+      <a class="btn" href="/shop">مشاهده محصولات</a>
+      <a class="btn btn-outline" href="/shop?sale=1">تخفیف‌دارها</a>
+    </div>
+  </div>
+  <div class="hero-art"><div class="bubble">🌸</div></div>
+</section>
+
+<div class="section-cards">
+  <% allSections.forEach((s, i) => { %>
+  <a class="section-card tone-<%= i % 5 %>" href="/shop?section=<%= encodeURIComponent(s.slug) %>">
+    <div><h3><%= s.name %></h3><% if (s.description) { %><p><%= s.description %></p><% } %></div><span class="emoji"><%= s.emoji || '✨' %></span>
+  </a>
+  <% }) %>
+</div>
+
+<% if (featured.length) { %>
+<div class="section-head"><h2>پیشنهاد ویژه</h2><a href="/shop">همه ←</a></div>
+<div class="grid"><% featured.forEach(p => { %><%- include('partials/card', { p }) %><% }) %></div>
+<% } %>
+
+<div class="section-head"><h2>جدیدترین محصولات</h2><a href="/shop?sort=newest">همه ←</a></div>
+<% if (newest.length) { %>
+<div class="grid"><% newest.forEach(p => { %><%- include('partials/card', { p }) %><% }) %></div>
+<% } else { %>
+<div class="empty"><div class="emoji">🌿</div><p>هنوز محصولی اضافه نشده است.</p></div>
+<% } %>
+<%- include('partials/footer') %>

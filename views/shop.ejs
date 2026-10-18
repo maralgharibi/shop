@@ -1,0 +1,92 @@
+<%- include('partials/header') %>
+<div class="shop-layout">
+  <aside class="filters" id="filters">
+    <form id="filter-form" action="/shop" method="get">
+      <% if (filters.q) { %><input type="hidden" name="q" value="<%= filters.q %>"><% } %>
+      <input type="hidden" name="sort" value="<%= filters.sort %>">
+      <% if (filters.cat) { %><input type="hidden" name="cat" value="<%= filters.cat %>"><% } %>
+      <% if (filters.section) { %><input type="hidden" name="section" value="<%= filters.section %>"><% } %>
+
+      <div class="filter-group">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h3>دسته‌بندی</h3>
+          <button type="button" class="btn btn-ghost btn-sm filter-close filter-toggle">بستن ✕</button>
+        </div>
+        <ul class="cat-list">
+          <li><a class="<%= !filters.cat && !filters.section ? 'active' : '' %>" href="/shop<%= filters.q ? '?q=' + encodeURIComponent(filters.q) : '' %>">همه محصولات</a></li>
+          <% allSections.forEach(s => { const sec = s.slug; %>
+            <li><a class="group-title <%= filters.section === sec && !filters.cat ? 'active' : '' %>" href="/shop?section=<%= encodeURIComponent(sec) %>"><%= s.emoji || '' %> <%= s.name %></a></li>
+            <% allCategories.filter(c => c.section === sec).forEach(c => { %>
+              <li><a class="<%= filters.cat === c.slug ? 'active' : '' %>" href="/shop?cat=<%= encodeURIComponent(c.slug) %>">— <%= c.name %></a></li>
+            <% }) %>
+          <% }) %>
+        </ul>
+      </div>
+
+      <div class="filter-group">
+        <h3>محدوده قیمت (تومان)</h3>
+        <div class="price-range">
+          <input class="input" type="text" inputmode="numeric" name="min" placeholder="از" value="<%= filters.min ?? '' %>">
+          <input class="input" type="text" inputmode="numeric" name="max" placeholder="تا" value="<%= filters.max ?? '' %>">
+        </div>
+      </div>
+
+      <% if (allBrands.length) { %>
+      <div class="filter-group">
+        <h3>برند</h3>
+        <% allBrands.forEach(b => { %>
+          <label class="check"><input type="checkbox" name="brand" value="<%= b %>" <%= filters.brands.includes(b) ? 'checked' : '' %> data-auto> <%= b %></label>
+        <% }) %>
+      </div>
+      <% } %>
+
+      <div class="filter-group">
+        <label class="check"><input type="checkbox" name="instock" value="1" <%= filters.inStock ? 'checked' : '' %> data-auto> فقط کالاهای موجود</label>
+        <label class="check"><input type="checkbox" name="sale" value="1" <%= filters.onSale ? 'checked' : '' %> data-auto> فقط تخفیف‌دار</label>
+      </div>
+
+      <button class="btn btn-block" type="submit">اعمال فیلتر</button>
+      <a class="btn btn-ghost btn-block" style="margin-top:8px" href="/shop">حذف همه فیلترها</a>
+    </form>
+  </aside>
+
+  <section>
+    <div class="shop-top">
+      <div>
+        <h1><%= heading %></h1>
+        <span class="count"><%= faNum(total) %> محصول</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button type="button" class="btn btn-ghost btn-sm filter-toggle" id="open-filters">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg> فیلترها
+        </button>
+        <select class="input sort-select" id="sort-select" aria-label="مرتب‌سازی">
+          <% [['newest','جدیدترین'],['cheap','ارزان‌ترین'],['expensive','گران‌ترین'],['discount','بیشترین تخفیف']].forEach(([v,l]) => { %>
+            <option value="<%= v %>" <%= filters.sort === v ? 'selected' : '' %>><%= l %></option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+
+    <% if (products.length) { %>
+      <div class="grid"><% products.forEach(p => { %><%- include('partials/card', { p }) %><% }) %></div>
+    <% } else { %>
+      <div class="empty">
+        <div class="emoji">🔎</div>
+        <p>محصولی با این مشخصات پیدا نشد.</p>
+        <a class="btn btn-outline" href="/shop">مشاهده همه محصولات</a>
+      </div>
+    <% } %>
+
+    <% if (pages > 1) { const link = n => '/shop?' + (qsBase ? qsBase + '&' : '') + 'page=' + n; %>
+      <nav class="pagination">
+        <% if (page > 1) { %><a href="<%= link(page - 1) %>">→</a><% } %>
+        <% for (let i = 1; i <= pages; i++) { if (i === 1 || i === pages || Math.abs(i - page) <= 2) { %>
+          <% if (i === page) { %><span class="current"><%= faNum(i) %></span><% } else { %><a href="<%= link(i) %>"><%= faNum(i) %></a><% } %>
+        <% } else if (Math.abs(i - page) === 3) { %><span>…</span><% } } %>
+        <% if (page < pages) { %><a href="<%= link(page + 1) %>">←</a><% } %>
+      </nav>
+    <% } %>
+  </section>
+</div>
+<%- include('partials/footer') %>

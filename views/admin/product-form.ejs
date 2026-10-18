@@ -1,0 +1,97 @@
+<%- include('_layout-top') %>
+<% const isEdit = !!p.id; %>
+<div class="admin-top">
+  <h1><%= isEdit ? 'ویرایش محصول' : 'افزودن محصول جدید' %></h1>
+  <% if (isEdit) { %><a class="btn btn-ghost" href="/product/<%= p.id %>" target="_blank">مشاهده در سایت</a><% } %>
+</div>
+
+<form action="<%= isEdit ? '/admin/products/' + p.id : '/admin/products' %>" method="post" enctype="multipart/form-data" id="product-form">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <div class="form-grid">
+    <div>
+      <div class="panel">
+        <h2>اطلاعات اصلی</h2>
+        <label class="field"><span>نام محصول *</span><input class="input" name="name" required value="<%= p.name || '' %>" placeholder="مثلاً: کرم آبرسان هیالورونیک اسید"></label>
+        <div class="two-col">
+          <label class="field"><span>برند</span><input class="input" name="brand" value="<%= p.brand || '' %>"></label>
+          <label class="field"><span>دسته‌بندی</span>
+            <select class="input" name="category_id">
+              <option value="">بدون دسته</option>
+              <% allSections.forEach(s => { %>
+              <optgroup label="<%= s.name %>">
+                <% allCategories.filter(c => c.section === s.slug).forEach(c => { %><option value="<%= c.id %>" <%= p.category_id === c.id ? 'selected' : '' %>><%= c.name %></option><% }) %>
+              </optgroup>
+              <% }) %>
+            </select>
+          </label>
+        </div>
+        <div class="two-col">
+          <label class="field"><span>مناسب برای <small>(نوع پوست/مو، زنانه/مردانه…)</small></span><input class="input" name="suitable_for" value="<%= p.suitable_for || '' %>" placeholder="پوست چرب / زنانه"></label>
+          <label class="field"><span>حجم / وزن / رنگ</span><input class="input" name="volume" value="<%= p.volume || '' %>" placeholder="100 میلی‌لیتر یا رنگ ۰۵"></label>
+        </div>
+        <label class="field"><span>توضیح کوتاه <small>(زیر نام محصول نمایش داده می‌شود)</small></span><input class="input" name="short_desc" value="<%= p.short_desc || '' %>"></label>
+      </div>
+
+      <div class="panel">
+        <h2>جزئیات و ویژگی‌ها</h2>
+        <label class="field"><span>توضیحات کامل</span><textarea class="input" name="description" rows="5"><%= p.description || '' %></textarea></label>
+        <label class="field"><span>ویژگی‌ها <small>(هر ویژگی در یک خط)</small></span><textarea class="input" name="features" rows="4" placeholder="فاقد سولفات&#10;مناسب استفاده روزانه"><%= p.features || '' %></textarea></label>
+        <label class="field"><span>روش مصرف</span><textarea class="input" name="how_to_use" rows="3"><%= p.how_to_use || '' %></textarea></label>
+        <label class="field"><span>ترکیبات / نُت‌های رایحه <small>(برای عطر)</small></span><textarea class="input" name="ingredients" rows="3"><%= p.ingredients || '' %></textarea></label>
+      </div>
+
+      <div class="panel">
+        <h2>تصاویر محصول</h2>
+        <label class="dropzone" id="dropzone">
+          <input type="file" name="images" accept="image/*" multiple id="file-input">
+          <div style="font-size:32px">📷</div>
+          <div>عکس‌ها را اینجا بکشید یا کلیک کنید</div>
+          <small>حداکثر ۸ عکس، هر کدام تا ۵ مگابایت (jpg، png، webp)</small>
+        </label>
+        <div class="img-grid" id="preview"></div>
+
+        <% if (images.length) { %>
+          <h3 style="font-size:14px;margin:18px 0 0">تصاویر فعلی</h3>
+          <div class="img-grid">
+            <% images.forEach((img, i) => { %>
+              <div class="img-item <%= i === 0 ? 'cover' : '' %>">
+                <img src="/uploads/<%= img.filename %>" alt="">
+                <div class="opts">
+                  <label><input type="radio" name="cover_image" value="<%= img.id %>" <%= i === 0 ? 'checked' : '' %>> عکس اصلی</label>
+                  <label style="color:var(--danger)"><input type="checkbox" name="delete_images" value="<%= img.id %>"> حذف</label>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>قیمت و موجودی</h2>
+        <label class="field"><span>قیمت (تومان) *</span><input class="input money-input" name="price" inputmode="numeric" required value="<%= p.price ? p.price.toLocaleString('en-US') : '' %>" dir="ltr"></label>
+        <label class="field"><span>قیمت با تخفیف <small>(اختیاری)</small></span><input class="input money-input" name="sale_price" inputmode="numeric" value="<%= p.sale_price ? p.sale_price.toLocaleString('en-US') : '' %>" dir="ltr"></label>
+        <div class="muted" id="discount-hint" style="font-size:13px;margin:-6px 0 12px"></div>
+        <label class="field"><span>تعداد موجودی</span><input class="input" name="stock" type="number" min="0" value="<%= p.stock ?? 0 %>" dir="ltr"></label>
+      </div>
+      <div class="panel">
+        <h2>نمایش</h2>
+        <label class="check"><input type="checkbox" name="is_active" value="1" <%= p.is_active ? 'checked' : '' %>> نمایش در سایت</label>
+        <label class="check"><input type="checkbox" name="is_featured" value="1" <%= p.is_featured ? 'checked' : '' %>> نمایش در «پیشنهاد ویژه» صفحه اصلی</label>
+      </div>
+      <div class="sticky-actions">
+        <button class="btn" style="flex:1"><%= isEdit ? 'ذخیره تغییرات' : 'افزودن محصول' %></button>
+        <a class="btn btn-ghost" href="/admin">انصراف</a>
+      </div>
+    </div>
+  </div>
+</form>
+
+<% if (isEdit) { %>
+  <form action="/admin/products/<%= p.id %>/delete" method="post" onsubmit="return confirm('این محصول برای همیشه حذف شود؟')" style="margin-top:8px">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <button class="btn btn-danger btn-sm">حذف محصول</button>
+  </form>
+<% } %>
+<%- include('_layout-bottom') %>
