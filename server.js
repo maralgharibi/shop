@@ -1,4 +1,5 @@
 const express = require('express');
+app.set('trust proxy', 1);
 const session = require('express-session');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
