@@ -1,5 +1,4 @@
 const express = require('express');
-app.set('trust proxy', 1);
 const session = require('express-session');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
@@ -9,6 +8,7 @@ const fs = require('fs');
 const db = require('./db');
 
 const app = express();
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 const SITE_NAME = process.env.SITE_NAME || 'مارال';
 const PAGE_SIZE = 12;
